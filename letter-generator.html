@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Генератор писем</title>
+  <title>Letter Generator</title>
   <style>
     :root {
       --bg: #0b0f14;
@@ -151,67 +151,68 @@
 <body>
   <div class="container">
     <header>
-      <h1>Генератор писем</h1>
-      <p>Заполните форму ниже и нажмите «Сгенерировать письмо».</p>
+      <h1>Letter Generator</h1>
+      <p>Fill in the form below and click "Generate letter".</p>
     </header>
 
     <form id="letter-form">
       <div class="grid">
         <div class="field">
-          <label for="name">Имя</label>
-          <input id="name" name="name" type="text" placeholder="Имя получателя" required />
+          <label for="name">Name</label>
+          <input id="name" name="name" type="text" placeholder="Recipient's name" required />
         </div>
         <div class="field">
-          <label for="date">Дата</label>
+          <label for="date">Date</label>
           <input id="date" name="date" type="date" />
         </div>
         <div class="field row-span-2">
-          <label for="address">Адрес</label>
-          <textarea id="address" name="address" rows="3" placeholder="Страна, город, улица, дом, индекс"></textarea>
+          <label for="address">Address</label>
+          <textarea id="address" name="address" rows="3" placeholder="Country, city, street, building, postal code"></textarea>
         </div>
         <div class="field">
-          <label for="type">Тип письма</label>
+          <label for="type">Letter type</label>
           <select id="type" name="type" required>
-            <option value="">Выберите тип...</option>
-            <option value="Благодарность">Благодарность</option>
-            <option value="Запрос информации">Запрос информации</option>
-            <option value="Жалоба">Жалоба</option>
-            <option value="Приглашение">Приглашение</option>
-            <option value="Прочее">Прочее</option>
+            <option value="">Choose type...</option>
+            <option value="Thank you">Thank you</option>
+            <option value="Information request">Information request</option>
+            <option value="Complaint">Complaint</option>
+            <option value="Invitation">Invitation</option>
+            <option value="Other">Other</option>
           </select>
         </div>
         <div class="field row-span-2">
-          <label for="details">Детали письма</label>
-          <textarea id="details" name="details" rows="6" placeholder="Ключевые детали, факты и пожелания" required></textarea>
+          <label for="details">Letter details</label>
+          <textarea id="details" name="details" rows="6" placeholder="Key details, facts, and requests" required></textarea>
         </div>
       </div>
       <div class="actions">
-        <button class="primary" type="submit">Сгенерировать письмо</button>
-        <button class="secondary" type="button" id="clearBtn">Очистить</button>
+        <button class="primary" type="submit">Generate letter</button>
+        <button class="secondary" type="button" id="clearBtn">Clear</button>
       </div>
     </form>
 
     <section class="result" id="result">
       <div class="result-header">
-        <h2>Результат</h2>
+        <h2>Result</h2>
         <div class="actions">
-          <button class="secondary" type="button" id="copyBtn" disabled>Скопировать</button>
-          <button class="secondary" type="button" id="downloadBtn" disabled>Скачать .txt</button>
+          <button class="secondary" type="button" id="copyBtn" disabled>Copy</button>
+          <button class="secondary" type="button" id="downloadBtn" disabled>Download .txt</button>
         </div>
       </div>
       <pre id="output" class="letter-output" aria-live="polite"></pre>
-      <div class="hint">Текст можно скопировать или скачать как .txt</div>
+      <div class="hint">You can copy the text or download it as .txt</div>
     </section>
   </div>
 
   <script>
-    function formatDateRu(value) {
+    function formatDateEn(value) {
       try {
         const date = value ? new Date(value) : new Date();
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return day + '.' + month + '.' + year;
+        return new Intl.DateTimeFormat('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }).format(date);
       } catch (e) {
         return value;
       }
@@ -219,14 +220,14 @@
 
     function buildBodyByType(type, details) {
       switch (type) {
-        case 'Благодарность':
-          return 'Выражаю искреннюю благодарность за ' + details + '.';
-        case 'Запрос информации':
-          return 'Прошу предоставить следующую информацию: ' + details + '.';
-        case 'Жалоба':
-          return 'Обращаюсь с жалобой по поводу: ' + details + '. Прошу принять меры и предоставить обратную связь.';
-        case 'Приглашение':
-          return 'Приглашаю вас ' + details + '. Буду признателен(на) за подтверждение участия.';
+        case 'Thank you':
+          return 'I would like to express my sincere gratitude for ' + details + '.';
+        case 'Information request':
+          return 'I kindly request the following information: ' + details + '.';
+        case 'Complaint':
+          return 'I am writing to file a complaint regarding: ' + details + '. Please take the necessary action and provide feedback.';
+        case 'Invitation':
+          return 'You are cordially invited to ' + details + '. I would appreciate your confirmation.';
         default:
           return details;
       }
@@ -238,15 +239,15 @@
         lines.push(data.address.trim());
         lines.push('');
       }
-      lines.push('Дата: ' + formatDateRu(data.date));
+      lines.push('Date: ' + formatDateEn(data.date));
       lines.push('');
       if (data.name) {
-        lines.push('Уважаемый(ая) ' + data.name.trim() + ',');
+        lines.push('Dear ' + data.name.trim() + ',');
         lines.push('');
       }
       lines.push(buildBodyByType(data.type, data.details.trim()));
       lines.push('');
-      lines.push('С уважением,');
+      lines.push('Sincerely,');
       lines.push('');
       lines.push('________________________');
       return lines.join('\n');
@@ -278,7 +279,7 @@
       e.preventDefault();
       const data = getFormData();
       if (!data.details || !data.type) {
-        alert('Пожалуйста, заполните обязательные поля.');
+        alert('Please fill in the required fields.');
         return;
       }
       const letter = generateLetter(data);
@@ -295,10 +296,10 @@
       const text = document.getElementById('output').textContent;
       try {
         await navigator.clipboard.writeText(text);
-        this.textContent = 'Скопировано';
-        setTimeout(() => { this.textContent = 'Скопировать'; }, 1200);
+        this.textContent = 'Copied';
+        setTimeout(() => { this.textContent = 'Copy'; }, 1200);
       } catch (e) {
-        alert('Не удалось скопировать текст.');
+        alert('Failed to copy text.');
       }
     });
 
@@ -308,7 +309,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'pisimo.txt';
+      a.download = 'letter.txt';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Генератор писем</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --surface: #11161d;
+      --muted-surface: #0f141b;
+      --text: #e8edf2;
+      --muted: #9fb0c2;
+      --accent: #4f9cff;
+      --accent-2: #6ee7b7;
+      --border: #1f2a36;
+      --danger: #ff6b6b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Noto Sans', 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+      background: linear-gradient(180deg, var(--bg), #0a0d12 40%, #0b0f15 100%);
+      color: var(--text);
+    }
+    .container {
+      max-width: 900px;
+      padding: 24px;
+      margin: 0 auto;
+    }
+    header h1 {
+      margin: 0 0 4px 0;
+      font-size: 28px;
+      letter-spacing: 0.2px;
+    }
+    header p {
+      margin: 0 0 24px 0;
+      color: var(--muted);
+    }
+    form {
+      background: rgba(17,22,29,0.9);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    label {
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--muted-surface);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    textarea { resize: vertical; min-height: 120px; }
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(79,156,255,0.7);
+      box-shadow: 0 0 0 4px rgba(79,156,255,0.12);
+    }
+    .row-span-2 { grid-column: span 2; }
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    button.primary {
+      background: linear-gradient(180deg, var(--accent), #3d89f2);
+      color: #0b1220;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(79,156,255,0.35);
+    }
+    button.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    section.result {
+      margin-top: 20px;
+      background: rgba(17,22,29,0.65);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .result-header h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--muted);
+    }
+    pre.letter-output {
+      background: var(--muted-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin: 0;
+      line-height: 1.55;
+      min-height: 120px;
+    }
+    .hint {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    @media (max-width: 720px) {
+      .grid { grid-template-columns: 1fr; }
+      .row-span-2 { grid-column: span 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Генератор писем</h1>
+      <p>Заполните форму ниже и нажмите «Сгенерировать письмо».</p>
+    </header>
+
+    <form id="letter-form">
+      <div class="grid">
+        <div class="field">
+          <label for="name">Имя</label>
+          <input id="name" name="name" type="text" placeholder="Имя получателя" required />
+        </div>
+        <div class="field">
+          <label for="date">Дата</label>
+          <input id="date" name="date" type="date" />
+        </div>
+        <div class="field row-span-2">
+          <label for="address">Адрес</label>
+          <textarea id="address" name="address" rows="3" placeholder="Страна, город, улица, дом, индекс"></textarea>
+        </div>
+        <div class="field">
+          <label for="type">Тип письма</label>
+          <select id="type" name="type" required>
+            <option value="">Выберите тип...</option>
+            <option value="Благодарность">Благодарность</option>
+            <option value="Запрос информации">Запрос информации</option>
+            <option value="Жалоба">Жалоба</option>
+            <option value="Приглашение">Приглашение</option>
+            <option value="Прочее">Прочее</option>
+          </select>
+        </div>
+        <div class="field row-span-2">
+          <label for="details">Детали письма</label>
+          <textarea id="details" name="details" rows="6" placeholder="Ключевые детали, факты и пожелания" required></textarea>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary" type="submit">Сгенерировать письмо</button>
+        <button class="secondary" type="button" id="clearBtn">Очистить</button>
+      </div>
+    </form>
+
+    <section class="result" id="result">
+      <div class="result-header">
+        <h2>Результат</h2>
+        <div class="actions">
+          <button class="secondary" type="button" id="copyBtn" disabled>Скопировать</button>
+          <button class="secondary" type="button" id="downloadBtn" disabled>Скачать .txt</button>
+        </div>
+      </div>
+      <pre id="output" class="letter-output" aria-live="polite"></pre>
+      <div class="hint">Текст можно скопировать или скачать как .txt</div>
+    </section>
+  </div>
+
+  <script>
+    function formatDateRu(value) {
+      try {
+        const date = value ? new Date(value) : new Date();
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return day + '.' + month + '.' + year;
+      } catch (e) {
+        return value;
+      }
+    }
+
+    function buildBodyByType(type, details) {
+      switch (type) {
+        case 'Благодарность':
+          return 'Выражаю искреннюю благодарность за ' + details + '.';
+        case 'Запрос информации':
+          return 'Прошу предоставить следующую информацию: ' + details + '.';
+        case 'Жалоба':
+          return 'Обращаюсь с жалобой по поводу: ' + details + '. Прошу принять меры и предоставить обратную связь.';
+        case 'Приглашение':
+          return 'Приглашаю вас ' + details + '. Буду признателен(на) за подтверждение участия.';
+        default:
+          return details;
+      }
+    }
+
+    function generateLetter(data) {
+      const lines = [];
+      if (data.address) {
+        lines.push(data.address.trim());
+        lines.push('');
+      }
+      lines.push('Дата: ' + formatDateRu(data.date));
+      lines.push('');
+      if (data.name) {
+        lines.push('Уважаемый(ая) ' + data.name.trim() + ',');
+        lines.push('');
+      }
+      lines.push(buildBodyByType(data.type, data.details.trim()));
+      lines.push('');
+      lines.push('С уважением,');
+      lines.push('');
+      lines.push('________________________');
+      return lines.join('\n');
+    }
+
+    function setOutput(content) {
+      const output = document.getElementById('output');
+      const copyBtn = document.getElementById('copyBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      output.textContent = content;
+      const hasContent = content.trim().length > 0;
+      copyBtn.disabled = !hasContent;
+      downloadBtn.disabled = !hasContent;
+    }
+
+    function getFormData() {
+      const form = document.getElementById('letter-form');
+      const formData = new FormData(form);
+      return {
+        name: String(formData.get('name') || '').trim(),
+        address: String(formData.get('address') || '').trim(),
+        date: String(formData.get('date') || '').trim(),
+        type: String(formData.get('type') || '').trim(),
+        details: String(formData.get('details') || '').trim()
+      };
+    }
+
+    document.getElementById('letter-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const data = getFormData();
+      if (!data.details || !data.type) {
+        alert('Пожалуйста, заполните обязательные поля.');
+        return;
+      }
+      const letter = generateLetter(data);
+      setOutput(letter);
+      document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', function() {
+      document.getElementById('letter-form').reset();
+      setOutput('');
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', async function() {
+      const text = document.getElementById('output').textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        this.textContent = 'Скопировано';
+        setTimeout(() => { this.textContent = 'Скопировать'; }, 1200);
+      } catch (e) {
+        alert('Не удалось скопировать текст.');
+      }
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+      const text = document.getElementById('output').textContent;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'pisimo.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
